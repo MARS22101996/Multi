@@ -2,7 +2,7 @@
 
 namespace HashCalculator.BLL.Models
 {
-    public class FileInformation : ICloneable
+    public class FileInformation
     {
         public string Name { get; set; }
 
@@ -11,10 +11,5 @@ namespace HashCalculator.BLL.Models
         public double Length { get; set; }
 
         public string Hash { get; set; }
-
-        public object Clone()
-        {
-            return MemberwiseClone();
-        }
     }
 }

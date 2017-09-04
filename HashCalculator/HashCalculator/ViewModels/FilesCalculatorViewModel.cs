@@ -117,7 +117,7 @@ namespace HashCalculator.ViewModels
         private void ConfigureFileInfo(string path)
         {
             ConfigureStartData();
-            _calculatorService.ClearXml();
+
             _calculatorService.RestoreToken();
 
             EnableDisableChooseButton(false);

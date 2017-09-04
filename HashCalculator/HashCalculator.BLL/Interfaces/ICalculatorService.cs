@@ -20,8 +20,6 @@ namespace HashCalculator.BLL.Interfaces
 
         void HandleExceptionsIfExists(Task task);
 
-        void ClearXml();
-
         void Cancel();
 
         void AddFile(FileInformation file);

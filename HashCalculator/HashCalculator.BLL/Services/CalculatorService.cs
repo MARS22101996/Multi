@@ -8,7 +8,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
-using HashCalculator.BLL.Infrastructure;
 using HashCalculator.BLL.Interfaces;
 using HashCalculator.BLL.Models;
 
@@ -82,7 +81,7 @@ namespace HashCalculator.BLL.Services
                 {
                     try
                     {
-                        using (var file = new FileStream(path, FileMode.OpenOrCreate, FileAccess.ReadWrite))
+                        using (var file = new FileStream(path, FileMode.Create, FileAccess.ReadWrite))
                         {
                             lock (_lockObject)
                             {
@@ -108,28 +107,6 @@ namespace HashCalculator.BLL.Services
         public void HandleExceptionsIfExists(Task task)
         {
             task.ContinueWith(t => t.Exception?.Flatten(), TaskContinuationOptions.OnlyOnFaulted);
-        }
-
-
-        public void ClearXml()
-        {
-            var folder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            var path = Path.Combine(folder, XmlFileName);
-
-            var serializer = new XmlSerializer(typeof(List<FileInformation>));
-
-            try
-            {
-                using (var stream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.ReadWrite))
-                {
-                    stream.SetLength(0);
-                    serializer.Serialize(stream, new List<FileInformation>());
-                }
-            }
-            catch (Exception e)
-            {
-                throw new Exception($"An error ocurred while executing the data clearing in the file: {e.Message}", e);
-            }
         }
 
         public void Cancel()
