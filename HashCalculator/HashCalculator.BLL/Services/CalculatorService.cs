@@ -139,12 +139,18 @@ namespace HashCalculator.BLL.Services
 
         public void AddFile(FileInformation file)
         {
-            _filesCollection.Add(file);
+            lock (_lockObject)
+            {
+                _filesCollection.Add(file);
+            }
         }
 
         public void ResetCollection()
         {
-            _filesCollection = new ObservableCollection<FileInformation>();
+            lock (_lockObject)
+            {
+                _filesCollection = new ObservableCollection<FileInformation>();
+            }
         }
     }
 }
