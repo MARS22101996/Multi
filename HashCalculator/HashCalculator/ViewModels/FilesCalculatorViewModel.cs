@@ -103,13 +103,16 @@ namespace HashCalculator.ViewModels
 
             if (!string.IsNullOrEmpty(path))
             {
-                Task.Run(() => ConfigureFileInfo(path));
+               Task.Run(() => ConfigureFileInfo(path));
             }
+        }));
+
+        public ICommand CancelCommand => _cancelCommand ?? (_cancelCommand = new Command(parameter =>
+        {
+            _calculatorService.Cancel();
 
             EnableDisableChooseButton(true);
         }));
-
-        public ICommand CancelCommand => _cancelCommand ?? (_cancelCommand = new Command(parameter => { _calculatorService.Cancel(); }));
 
         private void ConfigureFileInfo(string path)
         {
@@ -135,12 +138,12 @@ namespace HashCalculator.ViewModels
                         _calculatorService.RecordResultsInAnXmlFile(_calculatorService.CancelToken.Token);
                         WriteToTheProgressBar(_calculatorService.CancelToken.Token);
                     }
+
                 }
                 catch (Exception e)
                 {
                     throw new Exception($"An error ocurred while executing the data reading from file: {e.Message}", e);
-                }
-             
+                }           
             }
         }
 
@@ -202,7 +205,13 @@ namespace HashCalculator.ViewModels
         private void WriteToTheProgressBar(CancellationToken cancellationToken)
         {
             var task = Task.Run(() => Application.Current.Dispatcher.Invoke(() =>
-                ProgressValue++), cancellationToken);
+            {
+                ProgressValue++;
+                if (ProgressValue == ProgressMax)
+                {
+                    EnableDisableChooseButton(true);
+                }
+            }), cancellationToken);
 
             _calculatorService.HandleExceptionsIfExists(task);
         }
