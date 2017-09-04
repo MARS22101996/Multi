@@ -22,7 +22,7 @@ namespace HashCalculator.BLL.Services
 
         private readonly object _lockObject = new object();
 
-        private const string XmlFileName = "\\FilesInfo.xml";
+        private const string XmlFileName = "FilesInfo.xml";
 
         public ObservableCollection<FileInformation> Files => _filesCollection;
 
@@ -73,7 +73,7 @@ namespace HashCalculator.BLL.Services
         {
             var writer = new XmlSerializer(typeof(List<FileInformation>));
             var folder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            var path = folder+XmlFileName;
+            var path = Path.Combine(folder,XmlFileName);
             List<FileInformation> infos;
 
             var task = Task.Run(() =>
@@ -114,7 +114,7 @@ namespace HashCalculator.BLL.Services
         public void ClearXml()
         {
             var folder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            var path = folder + XmlFileName;
+            var path = Path.Combine(folder, XmlFileName);
 
             var serializer = new XmlSerializer(typeof(List<FileInformation>));
 
