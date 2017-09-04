@@ -29,13 +29,24 @@ namespace HashCalculator.ViewModels
 
         private ICalculatorService _calculatorService;
 
+        private readonly object _lockObject = new object();
+
+        public FilesCalculatorViewModel()
+        {
+            DiSetup.Initialize();
+
+            FilesInfo = new List<FileInformation>();
+
+            _calculatorService = DiSetup.Container.Resolve<ICalculatorService>(); ;
+        }
+
         public List<FileInformation> FilesInfo
         {
             get { return _filesInfo; }
             set
             {
                 _filesInfo = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("FilesInfo"));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FilesInfo)));
             }
         }
 
@@ -50,6 +61,22 @@ namespace HashCalculator.ViewModels
                     return;
 
                 _progressValue = value;
+                OnPropertyChanged();
+            }
+        }
+
+
+        private bool _chooseButtonIsEnabled = true;
+
+        public bool ChooseButtonIsEnabled
+        {
+            get { return _chooseButtonIsEnabled; }
+            set
+            {
+                if (value == _chooseButtonIsEnabled)
+                    return;
+
+                _chooseButtonIsEnabled = value;
                 OnPropertyChanged();
             }
         }
@@ -77,25 +104,19 @@ namespace HashCalculator.ViewModels
             {
                 Task.Run(() => ConfigureFileInfo(path));
             }
+
+            EnableDisableChooseButton(true);
         }));
 
         public ICommand CancelCommand => _cancelCommand ?? (_cancelCommand = new Command(parameter => { _calculatorService.Cancel(); }));
-
-
-        public FilesCalculatorViewModel()
-        {
-            DiSetup.Initialize();
-
-            FilesInfo = new List<FileInformation>();
-
-            _calculatorService = DiSetup.Container.Resolve<ICalculatorService>(); ;
-        }
 
         private void ConfigureFileInfo(string path)
         {
             ConfigureStartData();
             _calculatorService.ClearXml();
             _calculatorService.RestoreToken();
+
+            EnableDisableChooseButton(false);
 
             _filePaths = Directory.GetFiles(path, "*", SearchOption.AllDirectories).OrderBy(p => p).ToArray();
 
@@ -118,7 +139,7 @@ namespace HashCalculator.ViewModels
                 {
                     throw new Exception($"An error ocurred while executing the data reading from file: {e.Message}", e);
                 }
-
+             
             }
         }
 
@@ -131,11 +152,22 @@ namespace HashCalculator.ViewModels
             ProgressValue = 0;
         }
 
+        private void EnableDisableChooseButton(bool isEnabled)
+        {
+            Task.Run(() => Application.Current.Dispatcher.Invoke(() =>
+                ChooseButtonIsEnabled = isEnabled));
+        }
+
         private string OpenFileDialog()
         {
+            var path = string.Empty;
             var openFileDialog = new CommonOpenFileDialog();
             ConfigureFileDialog(openFileDialog);
-            var path = openFileDialog.FileName;
+
+            if (openFileDialog.ShowDialog() == CommonFileDialogResult.Ok)
+            {
+              path = openFileDialog.FileName;
+            }
 
             return path;
         }
@@ -144,8 +176,6 @@ namespace HashCalculator.ViewModels
         {
             openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             openFileDialog.IsFolderPicker = true;
-
-            openFileDialog.ShowDialog();
         }
 
         private void InputOfResultsIntoTheControl(FileInformation file, CancellationToken cancellationToken)
@@ -153,7 +183,11 @@ namespace HashCalculator.ViewModels
             var task = Task.Run(() =>
             {
                 _calculatorService.AddFile(file);
-                FilesInfo = _calculatorService.Files.ToList();
+
+                lock (_lockObject)
+                {
+                    FilesInfo = _calculatorService.Files.ToList();
+                }
 
             }, cancellationToken);
 

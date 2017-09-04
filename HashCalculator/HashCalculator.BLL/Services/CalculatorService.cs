@@ -72,7 +72,8 @@ namespace HashCalculator.BLL.Services
         {
             var writer = new XmlSerializer(typeof(List<FileInformation>));
             var folder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            var path = folder + XmlFileName;
+            var path = folder+XmlFileName;
+            List<FileInformation> infos;
 
             var task = Task.Run(() =>
             {
@@ -82,7 +83,11 @@ namespace HashCalculator.BLL.Services
                     {
                         using (var file = new FileStream(path, FileMode.OpenOrCreate, FileAccess.ReadWrite))
                         {
-                            writer.Serialize(file, _filesCollection.ToList());
+                            lock (_lockObject)
+                            {
+                                infos = _filesCollection.ToList();
+                            }
+                            writer.Serialize(file, infos);
                         }
                     }
                     catch (Exception e)
