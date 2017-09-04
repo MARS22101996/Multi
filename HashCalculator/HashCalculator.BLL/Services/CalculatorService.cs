@@ -75,7 +75,6 @@ namespace HashCalculator.BLL.Services
             var folder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             var path = folder+XmlFileName;
             List<FileInformation> infos;
-            List<FileInformation> new1;
 
             var task = Task.Run(() =>
             {
@@ -85,10 +84,8 @@ namespace HashCalculator.BLL.Services
                     {
                         using (var file = new FileStream(path, FileMode.OpenOrCreate, FileAccess.ReadWrite))
                         {
-                            lock (_lockObject)
-                            {
-                                infos = _filesCollection.ToList();
-                            }
+                            infos = _filesCollection.ToList();
+
                             writer.Serialize(file, infos);
                         }
                     }
@@ -147,6 +144,14 @@ namespace HashCalculator.BLL.Services
             lock (_lockObject)
             {
                 _filesCollection = new ObservableCollection<FileInformation>();
+            }
+        }
+
+        public ObservableCollection<FileInformation> GetCollection()
+        {
+            lock (_lockObject)
+            {
+               return _filesCollection;
             }
         }
     }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
@@ -180,13 +181,28 @@ namespace HashCalculator.ViewModels
 
         private void InputOfResultsIntoTheControl(FileInformation file, CancellationToken cancellationToken)
         {
+            ObservableCollection<FileInformation> info;
+            List<FileInformation> list;
             var task = Task.Run(() =>
             {
-                _calculatorService.AddFile(file);
 
                 lock (_lockObject)
                 {
-                    FilesInfo = _calculatorService.Files.ToList();
+                    _calculatorService.AddFile(file);
+                }
+
+
+                lock (_lockObject)
+                {
+                    info = _calculatorService.GetCollection();
+                }
+                lock (_lockObject)
+                {
+                   list = info.ToList();
+                }
+                lock (_lockObject)
+                {
+                    FilesInfo = list;
                 }
 
             }, cancellationToken);
