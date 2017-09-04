@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
@@ -14,7 +13,7 @@ using HashCalculator.BLL.Interfaces;
 using HashCalculator.BLL.Models;
 using HashCalculator.Commands;
 using HashCalculator.Infrastructure;
-using Microsoft.WindowsAPICodePack.Dialogs;
+using HashCalculator.Infrastructure.Interfaces;
 
 namespace HashCalculator.ViewModels
 {
@@ -28,7 +27,9 @@ namespace HashCalculator.ViewModels
 
         private List<FileInformation> _filesInfo;
 
-        private ICalculatorService _calculatorService;
+        private readonly ICalculatorService _calculatorService;
+
+        private readonly IFileDialogConfigurer _fileDialogConfigurer;
 
         private readonly object _lockObject = new object();
 
@@ -36,9 +37,11 @@ namespace HashCalculator.ViewModels
         {
             DiSetup.Initialize();
 
+            _fileDialogConfigurer = DiSetup.Container.Resolve<IFileDialogConfigurer>();
+
             FilesInfo = new List<FileInformation>();
 
-            _calculatorService = DiSetup.Container.Resolve<ICalculatorService>(); ;
+            _calculatorService = DiSetup.Container.Resolve<ICalculatorService>();
         }
 
         public List<FileInformation> FilesInfo
@@ -65,7 +68,6 @@ namespace HashCalculator.ViewModels
                 OnPropertyChanged();
             }
         }
-
 
         private bool _chooseButtonIsEnabled = true;
 
@@ -99,7 +101,7 @@ namespace HashCalculator.ViewModels
 
         public ICommand CalculateCommand => _calculateCommand ?? (_calculateCommand = new Command(parameter =>
         {		
-            var path = OpenFileDialog();
+            var path = _fileDialogConfigurer.OpenFileDialog();
 
             if (!string.IsNullOrEmpty(path))
             {
@@ -143,7 +145,7 @@ namespace HashCalculator.ViewModels
                 catch (Exception e)
                 {
                     throw new Exception($"An error ocurred while executing the data reading from file: {e.Message}", e);
-                }           
+                }
             }
         }
 
@@ -162,25 +164,6 @@ namespace HashCalculator.ViewModels
                 ChooseButtonIsEnabled = isEnabled));
         }
 
-        private string OpenFileDialog()
-        {
-            var path = string.Empty;
-            var openFileDialog = new CommonOpenFileDialog();
-            ConfigureFileDialog(openFileDialog);
-
-            if (openFileDialog.ShowDialog() == CommonFileDialogResult.Ok)
-            {
-              path = openFileDialog.FileName;
-            }
-
-            return path;
-        }
-
-        private void ConfigureFileDialog(CommonOpenFileDialog openFileDialog)
-        {
-            openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            openFileDialog.IsFolderPicker = true;
-        }
 
         private void InputOfResultsIntoTheControl(FileInformation file, CancellationToken cancellationToken)
         {
@@ -194,7 +177,7 @@ namespace HashCalculator.ViewModels
 
                 lock (_lockObject)
                 {
-                    FilesInfo = _calculatorService.Files.ToList(); ;
+                    FilesInfo = _calculatorService.Files.ToList();
                 }
 
             }, cancellationToken);

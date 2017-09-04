@@ -1,6 +1,7 @@
 ﻿using Autofac;
 using HashCalculator.BLL.Interfaces;
 using HashCalculator.BLL.Services;
+using HashCalculator.Infrastructure.Interfaces;
 
 namespace HashCalculator.Infrastructure
 {
@@ -13,6 +14,8 @@ namespace HashCalculator.Infrastructure
             var builder = new ContainerBuilder();
 
             builder.RegisterType<CalculatorService>().As<ICalculatorService>().InstancePerLifetimeScope();
+
+            builder.RegisterType<FileDialogConfigurer>().As<IFileDialogConfigurer>().InstancePerLifetimeScope();
 
             Container = builder.Build();
         }
