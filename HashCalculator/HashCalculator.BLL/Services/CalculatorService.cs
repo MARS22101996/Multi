@@ -84,14 +84,20 @@ namespace HashCalculator.BLL.Services
                     {
                         using (var file = new FileStream(path, FileMode.OpenOrCreate, FileAccess.ReadWrite))
                         {
-                            infos = _filesCollection.ToList();
-
-                            writer.Serialize(file, infos);
+                            lock (_lockObject)
+                            {
+                                infos = _filesCollection.ToList();
+                            }
+                            lock (_lockObject)
+                            {
+                                writer.Serialize(file, infos);
+                            }
                         }
                     }
                     catch (Exception e)
                     {
-                        throw new Exception($"An error ocurred while executing the data writing to the file: {e.Message}", e);
+                        throw new Exception(
+                            $"An error ocurred while executing the data writing to the file: {e.Message}", e);
                     }
                 }
             }, cancellationToken);
@@ -133,26 +139,12 @@ namespace HashCalculator.BLL.Services
 
         public void AddFile(FileInformation file)
         {
-            lock (_lockObject)
-            {
-                _filesCollection.Add(file);
-            }
+            _filesCollection.Add(file);
         }
 
         public void ResetCollection()
         {
-            lock (_lockObject)
-            {
-                _filesCollection = new ObservableCollection<FileInformation>();
-            }
-        }
-
-        public ObservableCollection<FileInformation> GetCollection()
-        {
-            lock (_lockObject)
-            {
-               return _filesCollection;
-            }
+            _filesCollection = new ObservableCollection<FileInformation>();
         }
     }
 }

@@ -27,7 +27,5 @@ namespace HashCalculator.BLL.Interfaces
         void AddFile(FileInformation file);
 
         void ResetCollection();
-
-        ObservableCollection<FileInformation> GetCollection();
     }
 }

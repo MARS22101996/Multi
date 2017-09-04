@@ -181,8 +181,6 @@ namespace HashCalculator.ViewModels
 
         private void InputOfResultsIntoTheControl(FileInformation file, CancellationToken cancellationToken)
         {
-            ObservableCollection<FileInformation> info;
-            List<FileInformation> list;
             var task = Task.Run(() =>
             {
 
@@ -191,18 +189,9 @@ namespace HashCalculator.ViewModels
                     _calculatorService.AddFile(file);
                 }
 
-
                 lock (_lockObject)
                 {
-                    info = _calculatorService.GetCollection();
-                }
-                lock (_lockObject)
-                {
-                   list = info.ToList();
-                }
-                lock (_lockObject)
-                {
-                    FilesInfo = list;
+                    FilesInfo = _calculatorService.Files.ToList(); ;
                 }
 
             }, cancellationToken);
