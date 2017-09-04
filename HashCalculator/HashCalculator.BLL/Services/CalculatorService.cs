@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
+using HashCalculator.BLL.Infrastructure;
 using HashCalculator.BLL.Interfaces;
 using HashCalculator.BLL.Models;
 
@@ -74,6 +75,7 @@ namespace HashCalculator.BLL.Services
             var folder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             var path = folder+XmlFileName;
             List<FileInformation> infos;
+            List<FileInformation> new1;
 
             var task = Task.Run(() =>
             {
@@ -134,12 +136,18 @@ namespace HashCalculator.BLL.Services
 
         public void AddFile(FileInformation file)
         {
-            _filesCollection.Add(file);
+            lock (_lockObject)
+            {
+                _filesCollection.Add(file);
+            }
         }
 
         public void ResetCollection()
         {
-            _filesCollection = new ObservableCollection<FileInformation>();
+            lock (_lockObject)
+            {
+                _filesCollection = new ObservableCollection<FileInformation>();
+            }
         }
     }
 }

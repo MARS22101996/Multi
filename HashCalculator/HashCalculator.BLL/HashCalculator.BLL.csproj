@@ -40,6 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Infrastructure\CloneClass.cs" />
     <Compile Include="Interfaces\ICalculatorService.cs" />
     <Compile Include="Models\FileInformation.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
