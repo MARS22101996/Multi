@@ -74,19 +74,27 @@ namespace HashCalculator.BLL.Services
 
             var task = Task.Run(async () =>
             {
-                using (var file = new FileStream(path, FileMode.Create, FileAccess.ReadWrite))
+                try
                 {
-                    while (true)
+                    using (var file = new FileStream(path, FileMode.Create, FileAccess.ReadWrite))
                     {
-                        writer.Serialize(file, _filesCollection.ToList());
-
-                        await Task.Delay(100, cancellationToken);
-
-                        if (_filesCollection.Count == maxValue)
+                        while (true)
                         {
-                            break;
+                            writer.Serialize(file, _filesCollection.ToList());
+
+                            await Task.Delay(100, cancellationToken);
+
+                            if (_filesCollection.Count == maxValue)
+                            {
+                                break;
+                            }
                         }
                     }
+                }
+                catch (Exception e)
+                {
+                    throw new Exception(
+                        $"An error ocurred while executing the data writing to the file: {e.Message}", e);
                 }
             }, cancellationToken);
 
@@ -99,11 +107,18 @@ namespace HashCalculator.BLL.Services
             {
                 foreach (var filePath in filePaths)
                 {
-                    using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                    try
                     {
-                        var info = GetFileInfo(stream, filePath);
+                        using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                        {
+                            var info = GetFileInfo(stream, filePath);
 
-                        AddFile(info);
+                            AddFile(info);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        throw new Exception($"An error ocurred while executing the data reading from file: {e.Message}", e);
                     }
                 }
 
