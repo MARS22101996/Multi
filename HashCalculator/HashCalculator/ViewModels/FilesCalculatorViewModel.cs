@@ -140,7 +140,8 @@ namespace HashCalculator.ViewModels
 
             _calculatorService.ResetCollection();
 
-            ProgressValue = 0;
+            Task.Run(() => Application.Current.Dispatcher.Invoke(() =>
+                ProgressValue = 0));
         }
 
         private void EnableDisableChooseButton(bool isEnabled)
@@ -156,6 +157,13 @@ namespace HashCalculator.ViewModels
             {
                 while (true)
                 {
+                    if (FilesInfo.Count == ProgressMax)
+                    {
+                        EnableDisableChooseButton(true);
+
+                        break;
+                    }
+
                     await Task.Run(() => Application.Current.Dispatcher.Invoke(() =>
                     {
                         FilesInfo = _calculatorService.Files.ToList();
@@ -168,12 +176,7 @@ namespace HashCalculator.ViewModels
 
                     }), cancellationToken);
 
-                    if (FilesInfo.Count == ProgressMax)
-                    {
-                        EnableDisableChooseButton(true);
 
-                        break;
-                    }
                 }
             }, cancellationToken);
 
