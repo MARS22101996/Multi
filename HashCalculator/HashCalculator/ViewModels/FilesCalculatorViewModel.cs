@@ -137,11 +137,11 @@ namespace HashCalculator.ViewModels
             //        using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
             //        {
             //            var info = _calculatorService.GetFileInfo(stream, filePath);
-         
-            //tasks.Add(Get(_calculatorService.CancelToken.Token));
+
+            Get(_calculatorService.CancelToken.Token);
             InputOfResultsIntoTheControl(_calculatorService.CancelToken.Token);
-            _calculatorService.RecordResultsInAnXmlFile(_calculatorService.CancelToken.Token);
-           WriteToTheProgressBar(_calculatorService.CancelToken.Token);
+            _calculatorService.RecordResultsInAnXmlFile(_calculatorService.CancelToken.Token, ProgressMax);
+           //WriteToTheProgressBar(_calculatorService.CancelToken.Token);
 
             
             //    }
@@ -172,24 +172,45 @@ namespace HashCalculator.ViewModels
 
         private Task InputOfResultsIntoTheControl(CancellationToken cancellationToken)
         {
-            var task = Task.Run(() =>
+            var task = Task.Run(async () =>
             {
-                foreach (var filePath in _filePaths)
+                while (true)
                 {
-                    using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                    if (FilesInfo.Count == ProgressMax)
                     {
-                        var info = _calculatorService.GetFileInfo(stream, filePath);
+                        EnableDisableChooseButton(true);
 
-                        Task.Run(() =>
-                        {
-                            _calculatorService.AddFile(info);
-
-                            FilesInfo = _calculatorService.Files.ToList();
-
-                        }, cancellationToken);
+                        break;
                     }
+
+                    await Task.Run(() => Application.Current.Dispatcher.Invoke(() => {
+
+                        ProgressValue = _calculatorService.Files.ToList().Count;
+
+                        FilesInfo = _calculatorService.Files.ToList();
+
+                    }), cancellationToken);
                 }
+
             }, cancellationToken);
+            //var task = Task.Run(() =>
+            //{
+            //    foreach (var filePath in _filePaths)
+            //    {
+            //        using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+            //        {
+            //            var info = _calculatorService.GetFileInfo(stream, filePath);
+
+            //var task = Task.Run(() =>
+            //            {
+            //                //_calculatorService.AddFile(info);
+
+            //                FilesInfo = _calculatorService.Files.ToList();
+
+            //            }, cancellationToken);
+            //    //    }
+                //}
+            //}, cancellationToken);
 
             _calculatorService.HandleExceptionsIfExists(task);
 
@@ -208,11 +229,11 @@ namespace HashCalculator.ViewModels
 
                         Task.Run(() =>
                         {
-                            //Thread.Sleep(10);
+
                             _calculatorService.AddFile(info);
 
 
-                            FilesInfo = _calculatorService.Files.ToList();
+                            //FilesInfo = _calculatorService.Files.ToList();
                         }, cancellationToken);
                     }
                 }
@@ -227,11 +248,6 @@ namespace HashCalculator.ViewModels
         {
             var task = Task.Run(async ()  =>
             {
-  //Task.Run(() => Application.Current.Dispatcher.Invoke(() =>
-                //{
-
-                //Task.Run(() => Application.Current.Dispatcher.Invoke(() =>
-                //    { 
                 while(true)
                 {
                     if (ProgressValue == ProgressMax)
@@ -241,22 +257,15 @@ namespace HashCalculator.ViewModels
                         break;
                     }
 
-                    await Task.Delay(100, cancellationToken);
-
-                    await Task.Run(() => Application.Current.Dispatcher.Invoke(() => { 
+                  await Task.Run(() => Application.Current.Dispatcher.Invoke(() => { 
 
 
-                        ProgressValue = _calculatorService.Files.ToList().Count;
+                      ProgressValue = _calculatorService.Files.ToList().Count;
 
-                    }), cancellationToken);
+                  }), cancellationToken);
                 }
 
             }, cancellationToken);
-                //}), cancellationToken);
-
-
-            
-    
 
                 _calculatorService.HandleExceptionsIfExists(task);
 

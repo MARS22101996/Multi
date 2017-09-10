@@ -17,7 +17,7 @@ namespace HashCalculator.BLL.Interfaces
 
         FileInformation GetFileInfo(Stream stream, string filePath);
 
-        Task RecordResultsInAnXmlFile(CancellationToken cancellationToken);
+        Task RecordResultsInAnXmlFile(CancellationToken cancellationToken, int maxValue);
 
         void HandleExceptionsIfExists(Task task);
 

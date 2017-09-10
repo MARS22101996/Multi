@@ -69,28 +69,45 @@ namespace HashCalculator.BLL.Services
         }
 
 
-        public Task RecordResultsInAnXmlFile(CancellationToken cancellationToken)
+        public Task RecordResultsInAnXmlFile(CancellationToken cancellationToken, int maxValue)
         {
             var writer = new XmlSerializer(typeof(List<FileInformation>));
             var folder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             var path = Path.Combine(folder,XmlFileName);
             List<FileInformation> infos;
 
-            var task = Task.Run(() =>
+            var task = Task.Run(async () =>
             {
-                lock (_lockObject)
-                {
+                //lock (_lockObject)
+                //{
                     try
                     {
                         using (var file = new FileStream(path, FileMode.Create, FileAccess.ReadWrite))
                         {
-                            lock (_lockObject)
+                            //    lock (_lockObject)
+                            //    {
+                            //        infos = _filesCollection.ToList();
+                            //    }
+                            //    lock (_lockObject)
+                            //    {
+                            //        writer.Serialize(file, infos);
+                            //    }
+                            while (true)
+                            {
+
+                            await Task.Run(() =>
                             {
                                 infos = _filesCollection.ToList();
-                            }
-                            lock (_lockObject)
-                            {
+
                                 writer.Serialize(file, infos);
+
+                            }, cancellationToken);
+
+                            if (_filesCollection.Count == maxValue)
+                                {
+                                    break;
+                                }
+
                             }
                         }
                     }
@@ -99,7 +116,7 @@ namespace HashCalculator.BLL.Services
                         throw new Exception(
                             $"An error ocurred while executing the data writing to the file: {e.Message}", e);
                     }
-                }
+                //}
             }, cancellationToken);
 
             HandleExceptionsIfExists(task);
