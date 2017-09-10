@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -19,8 +18,6 @@ namespace HashCalculator.BLL.Services
         private ConcurrentQueue<FileInformation> _filesCollection;
 
         private CancellationTokenSource _cancellationTokenSource;
-
-        private readonly object _lockObject = new object();
 
         private const string XmlFileName = "FilesInfo.xml";
 
@@ -69,12 +66,11 @@ namespace HashCalculator.BLL.Services
         }
 
 
-        public Task RecordResultsInAnXmlFile(CancellationToken cancellationToken, int maxValue)
+        public void RecordResultsInAnXmlFile(CancellationToken cancellationToken, int maxValue)
         {
             var writer = new XmlSerializer(typeof(List<FileInformation>));
             var folder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             var path = Path.Combine(folder, XmlFileName);
-            List<FileInformation> infos;
 
             var task = Task.Run(async () =>
             {
@@ -82,9 +78,7 @@ namespace HashCalculator.BLL.Services
                 {
                     while (true)
                     {
-                        infos = _filesCollection.ToList();
-
-                        writer.Serialize(file, infos);
+                        writer.Serialize(file, _filesCollection.ToList());
 
                         await Task.Delay(100, cancellationToken);
 
@@ -97,8 +91,25 @@ namespace HashCalculator.BLL.Services
             }, cancellationToken);
 
             HandleExceptionsIfExists(task);
+        }
 
-            return task;
+        public void CollectData(CancellationToken cancellationToken, string[] filePaths)
+        {
+            var task = Task.Run(() =>
+            {
+                foreach (var filePath in filePaths)
+                {
+                    using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                    {
+                        var info = GetFileInfo(stream, filePath);
+
+                        AddFile(info);
+                    }
+                }
+
+            }, cancellationToken);
+
+            HandleExceptionsIfExists(task);
         }
 
         public void HandleExceptionsIfExists(Task task)

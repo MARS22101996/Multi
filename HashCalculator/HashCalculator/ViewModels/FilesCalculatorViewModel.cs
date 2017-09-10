@@ -32,8 +32,6 @@ namespace HashCalculator.ViewModels
 
         private readonly IFileDialogConfigurer _fileDialogConfigurer;
 
-        private readonly object _lockObject = new object();
-
         public FilesCalculatorViewModel()
         {
             DiSetup.Initialize();
@@ -101,7 +99,7 @@ namespace HashCalculator.ViewModels
         }
 
         public ICommand CalculateCommand => _calculateCommand ?? (_calculateCommand = new Command(parameter =>
-        {		
+        {
             var path = _fileDialogConfigurer.OpenFileDialog();
 
             if (!string.IsNullOrEmpty(path))
@@ -120,16 +118,13 @@ namespace HashCalculator.ViewModels
         private void ConfigureFileInfoAsync(string path)
         {
             ConfigureStartData();
-
             _calculatorService.RestoreToken();
-
             EnableDisableChooseButton(false);
 
             _filePaths = Directory.GetFiles(path, "*", SearchOption.AllDirectories).OrderBy(p => p).ToArray();
-
             ProgressMax = _filePaths.Length;
 
-            CollectData(_calculatorService.CancelToken.Token);
+            _calculatorService.CollectData(_calculatorService.CancelToken.Token, _filePaths);
             InputOfResultsIntoTheControls(_calculatorService.CancelToken.Token);
             _calculatorService.RecordResultsInAnXmlFile(_calculatorService.CancelToken.Token, ProgressMax);
         }
@@ -171,29 +166,6 @@ namespace HashCalculator.ViewModels
                     await Task.Delay(100, cancellationToken);
                 }
             }), cancellationToken);
-
-            _calculatorService.HandleExceptionsIfExists(task);
-        }
-
-        private void CollectData(CancellationToken cancellationToken)
-        {
-            var task = Task.Run(() =>
-            {
-                foreach (var filePath in _filePaths)
-                {
-                    using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
-                    {
-                        var info = _calculatorService.GetFileInfo(stream, filePath);
-
-                        Task.Run(() =>
-                        {
-                            _calculatorService.AddFile(info);
-
-                        }, cancellationToken);
-                    }
-                }
-
-            }, cancellationToken);
 
             _calculatorService.HandleExceptionsIfExists(task);
         }
