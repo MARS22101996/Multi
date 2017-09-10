@@ -78,34 +78,27 @@ namespace HashCalculator.BLL.Services
 
             var task = Task.Run(async () =>
             {
-                    //try
-                    //{
-                        using (var file = new FileStream(path, FileMode.Create, FileAccess.ReadWrite))
+                using (var file = new FileStream(path, FileMode.Create, FileAccess.ReadWrite))
+                {
+                    while (true)
+                    {
+                        await Task.Run(() =>
                         {
-                            while (true)
-                            {
+                            infos = _filesCollection.ToList();
 
-                            await Task.Run(() =>
-                            {
-                                infos = _filesCollection.ToList();
+                            writer.Serialize(file, infos);
 
-                                writer.Serialize(file, infos);
+                        }, cancellationToken);
 
-                            }, cancellationToken);
+                        await Task.Delay(100, cancellationToken);
 
-                            if (_filesCollection.Count == maxValue)
-                                {
-                                    break;
-                                }
-
-                            }
+                        if (_filesCollection.Count == maxValue)
+                        {
+                            break;
                         }
-                    //}
-                    //catch (Exception e)
-                    //{
-                    //    throw new Exception(
-                    //        $"An error ocurred while executing the data writing to the file: {e.Message}", e);
-                    //}
+                    }
+                }
+
             }, cancellationToken);
 
             HandleExceptionsIfExists(task);
@@ -125,18 +118,12 @@ namespace HashCalculator.BLL.Services
 
         public void AddFile(FileInformation file)
         {
-            lock (_lockObject)
-            {
-                _filesCollection.Enqueue(file);
-            }
+            _filesCollection.Enqueue(file);
         }
 
         public void ResetCollection()
         {
-            lock (_lockObject)
-            {
-                _filesCollection = new ConcurrentQueue<FileInformation>();
-            }
+            _filesCollection = new ConcurrentQueue<FileInformation>();
         }
     }
 }
