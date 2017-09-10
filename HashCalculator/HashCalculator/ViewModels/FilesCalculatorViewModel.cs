@@ -168,16 +168,11 @@ namespace HashCalculator.ViewModels
                     {
                         FilesInfo = _calculatorService.Files.ToList();
 
-                    }), cancellationToken);
-
-                    await Task.Run(() => Application.Current.Dispatcher.Invoke(() =>
-                    {
                         ProgressValue = FilesInfo.Count;
 
                     }), cancellationToken);
 
                     await Task.Delay(100, cancellationToken);
-
                 }
             }, cancellationToken);
 
