@@ -106,7 +106,7 @@ namespace HashCalculator.ViewModels
 
             if (!string.IsNullOrEmpty(path))
             {
-               Task.Run(() => ConfigureFileInfoAsync(path));
+              Task.Run(() => ConfigureFileInfoAsync(path));
             }
         }));
 
@@ -176,6 +176,7 @@ namespace HashCalculator.ViewModels
 
                     }), cancellationToken);
 
+                    await Task.Delay(100, cancellationToken);
 
                 }
             }, cancellationToken);

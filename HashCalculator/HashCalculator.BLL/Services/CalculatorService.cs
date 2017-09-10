@@ -78,20 +78,10 @@ namespace HashCalculator.BLL.Services
 
             var task = Task.Run(async () =>
             {
-                //lock (_lockObject)
-                //{
-                    try
-                    {
+                    //try
+                    //{
                         using (var file = new FileStream(path, FileMode.Create, FileAccess.ReadWrite))
                         {
-                            //    lock (_lockObject)
-                            //    {
-                            //        infos = _filesCollection.ToList();
-                            //    }
-                            //    lock (_lockObject)
-                            //    {
-                            //        writer.Serialize(file, infos);
-                            //    }
                             while (true)
                             {
 
@@ -110,13 +100,12 @@ namespace HashCalculator.BLL.Services
 
                             }
                         }
-                    }
-                    catch (Exception e)
-                    {
-                        throw new Exception(
-                            $"An error ocurred while executing the data writing to the file: {e.Message}", e);
-                    }
-                //}
+                    //}
+                    //catch (Exception e)
+                    //{
+                    //    throw new Exception(
+                    //        $"An error ocurred while executing the data writing to the file: {e.Message}", e);
+                    //}
             }, cancellationToken);
 
             HandleExceptionsIfExists(task);
