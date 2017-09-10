@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -68,7 +69,7 @@ namespace HashCalculator.BLL.Services
         }
 
 
-        public void RecordResultsInAnXmlFile(CancellationToken cancellationToken)
+        public Task RecordResultsInAnXmlFile(CancellationToken cancellationToken)
         {
             var writer = new XmlSerializer(typeof(List<FileInformation>));
             var folder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
@@ -102,6 +103,8 @@ namespace HashCalculator.BLL.Services
             }, cancellationToken);
 
             HandleExceptionsIfExists(task);
+
+            return task;
         }
 
         public void HandleExceptionsIfExists(Task task)

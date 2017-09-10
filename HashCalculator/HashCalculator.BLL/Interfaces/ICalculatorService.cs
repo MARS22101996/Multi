@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Concurrent;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,7 +17,7 @@ namespace HashCalculator.BLL.Interfaces
 
         FileInformation GetFileInfo(Stream stream, string filePath);
 
-        void RecordResultsInAnXmlFile(CancellationToken cancellationToken);
+        Task RecordResultsInAnXmlFile(CancellationToken cancellationToken);
 
         void HandleExceptionsIfExists(Task task);
 
