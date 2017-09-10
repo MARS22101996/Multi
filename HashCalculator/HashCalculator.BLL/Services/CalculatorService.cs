@@ -73,7 +73,7 @@ namespace HashCalculator.BLL.Services
         {
             var writer = new XmlSerializer(typeof(List<FileInformation>));
             var folder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            var path = Path.Combine(folder,XmlFileName);
+            var path = Path.Combine(folder, XmlFileName);
             List<FileInformation> infos;
 
             var task = Task.Run(async () =>
@@ -82,13 +82,9 @@ namespace HashCalculator.BLL.Services
                 {
                     while (true)
                     {
-                        await Task.Run(() =>
-                        {
-                            infos = _filesCollection.ToList();
+                        infos = _filesCollection.ToList();
 
-                            writer.Serialize(file, infos);
-
-                        }, cancellationToken);
+                        writer.Serialize(file, infos);
 
                         await Task.Delay(100, cancellationToken);
 
@@ -98,7 +94,6 @@ namespace HashCalculator.BLL.Services
                         }
                     }
                 }
-
             }, cancellationToken);
 
             HandleExceptionsIfExists(task);

@@ -153,7 +153,7 @@ namespace HashCalculator.ViewModels
 
         private void InputOfResultsIntoTheControls(CancellationToken cancellationToken)
         {
-            var task = Task.Run(async () =>
+            var task = Task.Run(() => Application.Current.Dispatcher.Invoke(async () =>
             {
                 while (true)
                 {
@@ -164,17 +164,13 @@ namespace HashCalculator.ViewModels
                         break;
                     }
 
-                    await Task.Run(() => Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        FilesInfo = _calculatorService.Files.ToList();
+                    FilesInfo = _calculatorService.Files.ToList();
 
-                        ProgressValue = FilesInfo.Count;
-
-                    }), cancellationToken);
+                    ProgressValue = FilesInfo.Count;
 
                     await Task.Delay(100, cancellationToken);
                 }
-            }, cancellationToken);
+            }), cancellationToken);
 
             _calculatorService.HandleExceptionsIfExists(task);
         }
