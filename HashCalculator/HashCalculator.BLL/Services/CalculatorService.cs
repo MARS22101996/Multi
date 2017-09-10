@@ -16,7 +16,7 @@ namespace HashCalculator.BLL.Services
 {
     public class CalculatorService : ICalculatorService
     {
-        private ObservableCollection<FileInformation> _filesCollection;
+        private ConcurrentQueue<FileInformation> _filesCollection;
 
         private CancellationTokenSource _cancellationTokenSource;
 
@@ -24,13 +24,13 @@ namespace HashCalculator.BLL.Services
 
         private const string XmlFileName = "FilesInfo.xml";
 
-        public ObservableCollection<FileInformation> Files => _filesCollection;
+        public ConcurrentQueue<FileInformation> Files => _filesCollection;
 
         public CancellationTokenSource CancelToken => _cancellationTokenSource;
 
         public CalculatorService()
         {
-            _filesCollection = new ObservableCollection<FileInformation>();
+            _filesCollection = new ConcurrentQueue<FileInformation>();
 
             _cancellationTokenSource = new CancellationTokenSource();
         }
@@ -121,7 +121,7 @@ namespace HashCalculator.BLL.Services
         {
             lock (_lockObject)
             {
-                _filesCollection.Add(file);
+                _filesCollection.Enqueue(file);
             }
         }
 
@@ -129,7 +129,7 @@ namespace HashCalculator.BLL.Services
         {
             lock (_lockObject)
             {
-                _filesCollection = new ObservableCollection<FileInformation>();
+                _filesCollection = new ConcurrentQueue<FileInformation>();
             }
         }
     }

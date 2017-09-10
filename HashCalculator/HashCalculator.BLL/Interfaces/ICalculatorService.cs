@@ -9,7 +9,7 @@ namespace HashCalculator.BLL.Interfaces
 {
     public interface ICalculatorService
     {
-        ObservableCollection<FileInformation> Files { get; }
+        ConcurrentQueue<FileInformation> Files { get; }
 
         CancellationTokenSource CancelToken { get; }
 
